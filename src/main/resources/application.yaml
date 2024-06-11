@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: phoenix-gateway
+
+server:
+  port: 8888
+
+
+phoenix:
+  registry:
+    servers: http://localhost:8484
