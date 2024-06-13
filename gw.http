@@ -4,9 +4,11 @@ GET http://localhost:8888/hello
 ### GET gw
 GET http://localhost:8888/gw
 
+### GET ga
+GET http://localhost:8888/ga/hello
 
 ### POST user
-POST http://localhost:8888/gw/cn.zyszero.phoenix.rpc.demo.api.UserService
+POST http://localhost:8888/ga/cn.zyszero.phoenix.rpc.demo.api.UserService
 Content-Type: application/json
 
 {
