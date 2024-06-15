@@ -1,6 +1,7 @@
 package io.github.zyszero.phoenix.gateway.web.handler;
 
 import io.github.zyszero.phoenix.gateway.DefaultGatewayPluginChain;
+import io.github.zyszero.phoenix.gateway.GatewayFilter;
 import io.github.zyszero.phoenix.gateway.GatewayPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,10 @@ public class GatewayWebHandler implements WebHandler {
     List<GatewayPlugin> plugins;
 
 
+    @Autowired
+    List<GatewayFilter> filters;
+
+
     @NotNull
     @Override
     public Mono<Void> handle(ServerWebExchange exchange) {
@@ -35,6 +40,10 @@ public class GatewayWebHandler implements WebHandler {
                     """;
             return exchange.getResponse()
                     .writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(mock.getBytes())));
+        }
+
+        for (GatewayFilter filter : filters) {
+            filter.filter(exchange);
         }
 
         return new DefaultGatewayPluginChain(plugins).handle(exchange);
