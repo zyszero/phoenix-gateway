@@ -5,6 +5,7 @@ import cn.zyszero.phoenix.rpc.core.api.RegistryCenter;
 import cn.zyszero.phoenix.rpc.core.meta.InstanceMeta;
 import cn.zyszero.phoenix.rpc.core.meta.ServiceMeta;
 import io.github.zyszero.phoenix.gateway.AbstractGatewayPlugin;
+import io.github.zyszero.phoenix.gateway.GatewayPluginChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +42,7 @@ public class PhoenixRpcPlugin extends AbstractGatewayPlugin {
     }
 
     @Override
-    public Mono<Void> doHandle(ServerWebExchange exchange) {
+    public Mono<Void> doHandle(ServerWebExchange exchange, GatewayPluginChain chain) {
         System.out.println("=======>>>>>>> [phoenixRpcPlugin] ...");
 
         // 1. 通过请求路径获取服务名
@@ -78,7 +79,8 @@ public class PhoenixRpcPlugin extends AbstractGatewayPlugin {
 
 
         return body.flatMap(data -> exchange.getResponse()
-                .writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(data.getBytes()))));
+                        .writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(data.getBytes()))))
+                .then(chain.handle(exchange));
     }
 
 

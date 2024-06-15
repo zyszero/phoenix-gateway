@@ -1,6 +1,7 @@
 package io.github.zyszero.phoenix.gateway.plugin;
 
 import io.github.zyszero.phoenix.gateway.AbstractGatewayPlugin;
+import io.github.zyszero.phoenix.gateway.GatewayPluginChain;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,7 @@ public class DirectPlugin extends AbstractGatewayPlugin {
     private String PREFIX = GATEWAY_PREFIX + "/" + NAME + "/";
 
     @Override
-    public Mono<Void> doHandle(ServerWebExchange exchange) {
+    public Mono<Void> doHandle(ServerWebExchange exchange, GatewayPluginChain chain) {
         System.out.println("=======>>>>>>> [DirectPlugin] ...");
         String backend = exchange.getRequest().getQueryParams().getFirst("backend");
         Flux<DataBuffer> requestBody = exchange.getRequest().getBody();
@@ -33,7 +34,8 @@ public class DirectPlugin extends AbstractGatewayPlugin {
         exchange.getResponse().getHeaders().add("phoenix.gw.plugin", getName());
 
         if (backend == null || backend.isEmpty()) {
-            return requestBody.flatMap(body -> exchange.getResponse().writeWith(Mono.just(body))).then();
+            return requestBody.flatMap(body -> exchange.getResponse().writeWith(Mono.just(body)))
+                    .then(chain.handle(exchange));
         }
 
         WebClient client = WebClient.create(backend);
@@ -46,7 +48,8 @@ public class DirectPlugin extends AbstractGatewayPlugin {
         Mono<String> body = entity.map(ResponseEntity::getBody);
 
         return body.flatMap(data -> exchange.getResponse()
-                .writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(data.getBytes()))));
+                .writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(data.getBytes()))))
+                .then(chain.handle(exchange));
 
     }
 

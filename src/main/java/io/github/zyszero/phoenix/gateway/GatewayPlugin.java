@@ -20,6 +20,6 @@ public interface GatewayPlugin {
     String getName();
 
     boolean support(ServerWebExchange exchange);
-    Mono<Void> handle(ServerWebExchange exchange);
+    Mono<Void> handle(ServerWebExchange exchange, GatewayPluginChain chain);
 
 }
