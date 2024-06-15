@@ -14,6 +14,8 @@ import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 
 import java.util.Properties;
 
+import static io.github.zyszero.phoenix.gateway.GatewayPlugin.GATEWAY_PREFIX;
+
 /**
  * gateway config
  *
@@ -38,7 +40,7 @@ public class GatewayConfig {
         return args -> {
             SimpleUrlHandlerMapping handlerMapping = context.getBean(SimpleUrlHandlerMapping.class);
             Properties properties = new Properties();
-            properties.put("/ga/**", "gatewayWebHandler");
+            properties.put(GATEWAY_PREFIX + "/**", "gatewayWebHandler");
             handlerMapping.setMappings(properties);
             handlerMapping.initApplicationContext();
             System.out.println("phoenix gateway start");

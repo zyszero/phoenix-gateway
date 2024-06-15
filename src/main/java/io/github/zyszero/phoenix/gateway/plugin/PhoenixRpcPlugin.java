@@ -1,29 +1,33 @@
-package io.github.zyszero.phoenix.gateway;
+package io.github.zyszero.phoenix.gateway.plugin;
 
 import cn.zyszero.phoenix.rpc.core.api.LoadBalancer;
 import cn.zyszero.phoenix.rpc.core.api.RegistryCenter;
 import cn.zyszero.phoenix.rpc.core.meta.InstanceMeta;
 import cn.zyszero.phoenix.rpc.core.meta.ServiceMeta;
+import io.github.zyszero.phoenix.gateway.AbstractGatewayPlugin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebHandler;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 
 /**
- * gateway web handler.
+ * Phoenix rpc gateway plugin
  *
  * @Author: zyszero
- * @Date: 2024/6/14 0:42
+ * @Date: 2024/6/15 19:04
  */
-@Component("gatewayWebHandler")
-public class GatewayWebHandler implements WebHandler {
+@Component("phoenixRpcPlugin")
+public class PhoenixRpcPlugin extends AbstractGatewayPlugin {
+
+    public static final String NAME = "phoenix-rpc";
+
+    private String PREFIX = GATEWAY_PREFIX + "/" + NAME + "/";
 
     @Autowired
     RegistryCenter registryCenter;
@@ -32,12 +36,16 @@ public class GatewayWebHandler implements WebHandler {
     LoadBalancer<InstanceMeta> loadBalancer;
 
     @Override
-    public Mono<Void> handle(ServerWebExchange exchange) {
+    public boolean doSupport(ServerWebExchange exchange) {
+        return exchange.getRequest().getPath().value().startsWith(PREFIX);
+    }
 
-        System.out.println("===>>>> Phoenix Gateway web handler ...");
+    @Override
+    public Mono<Void> doHandle(ServerWebExchange exchange) {
+        System.out.println("=======>>>>>>> [phoenixRpcPlugin] ...");
 
         // 1. 通过请求路径获取服务名
-        String service = exchange.getRequest().getPath().value().substring(4);
+        String service = exchange.getRequest().getPath().value().substring(PREFIX.length());
         ServiceMeta serviceMeta = ServiceMeta.builder().name(service)
                 .app("app1").env("dev").namespace("public").build();
         // 2. 通过 registryCenter 获取所有或者的服务实例
@@ -66,10 +74,16 @@ public class GatewayWebHandler implements WebHandler {
         // 7. 组装响应报文
         exchange.getResponse().getHeaders().add("Content-Type", "application/json");
         exchange.getResponse().getHeaders().add("phoenix.gw.version", "v1.0.0");
+        exchange.getResponse().getHeaders().add("phoenix.gw.plugin", getName());
 
 
         return body.flatMap(data -> exchange.getResponse()
                 .writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(data.getBytes()))));
+    }
 
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 }

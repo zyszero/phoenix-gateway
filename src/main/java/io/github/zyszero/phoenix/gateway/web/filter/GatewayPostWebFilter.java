@@ -1,4 +1,4 @@
-package io.github.zyszero.phoenix.gateway;
+package io.github.zyszero.phoenix.gateway.web.filter;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;

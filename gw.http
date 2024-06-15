@@ -5,10 +5,10 @@ GET http://localhost:8888/hello
 GET http://localhost:8888/gw
 
 ### GET ga
-GET http://localhost:8888/ga/hello
+GET http://localhost:8888/gw/hello
 
-### POST user
-POST http://localhost:8888/ga/cn.zyszero.phoenix.rpc.demo.api.UserService
+### POST phoenix-rpc
+POST http://localhost:8888/gw/phoenix-rpc/cn.zyszero.phoenix.rpc.demo.api.UserService
 Content-Type: application/json
 
 {
@@ -17,4 +17,29 @@ Content-Type: application/json
   "args": [
     100
   ]
+}
+
+### POST direct
+POST http://localhost:8888/gw/direct/cn.zyszero.phoenix.rpc.demo.api.UserService
+Content-Type: application/json
+
+{
+  "service": "cn.zyszero.phoenix.rpc.demo.api.UserService",
+  "methodSign": "findById@1_int",
+  "args": [
+    100
+  ]
+}
+
+
+### POST direct backend
+POST http://localhost:8888/gw/direct/cn.zyszero.phoenix.rpc.demo.api.UserService?backend=http://192.168.36.177:8081/phoenix-rpc
+Content-Type: application/json
+
+{
+"service": "cn.zyszero.phoenix.rpc.demo.api.UserService",
+"methodSign": "findById@1_int",
+"args": [
+100
+]
 }
